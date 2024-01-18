@@ -1,0 +1,44 @@
+SDLGL: prep addGLU rbrc cleanup
+	@echo installation complete
+	@echo either close the terminal and open a new one or navigate to your home directory and source the .bashrc 
+	
+prep: dirs SDLGLsf.tgz
+	@echo -n extracting temporary setup files ...
+	@tar -xf SDLGLsf.tgz
+	@echo " done"
+
+addGLU: tSDLGLsf/myglu.c tSDLGLsf/myglu.h
+	@echo -n creating a stripped down, minimalist GL utility library ...
+	@clang tSDLGLsf/myglu.c -I /usr/include -c -o tSDLGLsf/myglu.o 
+	@ar -r $$HOME/myCLibs/lib/libGLU.a tSDLGLsf/myglu.o 2>/dev/null
+	@cp tSDLGLsf/myglu.h $$HOME/myCLibs/include/GL/glu.h
+	@echo " done"
+
+dirs: 
+	@echo -n setting up build directory tree ...
+	@mkdir $$HOME/myCLibs
+	@mkdir $$HOME/myCLibs/lib
+	@mkdir $$HOME/myCLibs/include
+	@mkdir $$HOME/myCLibs/include/GL
+	@echo " done"
+
+rbrc: obrc tSDLGLsf/brb tSDLGLsf/brc
+	@echo -n backing up ".bashrc" ...
+	@touch $$HOME/.bashrc
+	@cat $$HOME/.bashrc ./tSDLGLsf/brb $$HOME/.old_bashrc >$$HOME/.oldbashrc 2>/dev/null
+	@mv -f $$HOME/.oldbashrc $$HOME/.old_bashrc
+	@echo -n " ..."
+	@mv -b $$HOME/.bashrc $$HOME/.prev_bashrc
+	@echo -n setting up new ".bashrc ... "
+	@cp -f ./tSDLGLsf/brc $$HOME/.bashrc
+	@echo done	
+
+cleanup:
+	@echo -n cleaning up temporary setup files ...
+	@rm tSDLGLsf/*
+	@rm -d tSDLGLsf
+	@echo " done"
+
+obrc:
+	@touch  $$HOME/.old_bashrc
+	
